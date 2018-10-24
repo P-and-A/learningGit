@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>四则运算式练习</title>
+    <script src="http://unpkg.com/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/vue.resource/1.0.3/vue-resource.min.js"></script>
+    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- 可选的 Bootstrap 主题文件（一般不用引入） -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js">
+    </script>
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+        window.onload = function(){
+            var vm = new Vue({
+                el:'#box',
+                data:{
+                    msg:[],
+                    selected:'',
+                    wrongNum:0,
+                    ischeck: false,
+                    skinchange:false,
+                },
+                watch: {
+                    // 如果 `question` 发生改变，这个函数就会运行
+                    selected: function () {
+                        this.get();
+                    }
+                },
+                methods:{
+                    get:function(){
+                        //发送get请求
+                        var num = $('#itemNum').val();
+                        this.ischeck = false; //刷新批改状态
+                        this.$http.get('get_questions/'+this.selected).then(function(res){
+                            this.msg=res.body;
+                        },function(){
+                            console.log('请求失败');
+                        });
+//                        页面初始化
+                        $.each( $('[data-index]'), function(index,item){
+                            var a = item.children;
+                            a[1].value="";
+                            if(a[2].style.visibility="visible"){
+                                a[2].style.visibility="hidden";
+                            }
+                        });
+                    },
+                    change:function () {
+                        this.skinchange=!this.skinchange;
+                    },
+                    check:function () {
+                        $.each( $('[data-index]'), function(index,item){
+                            var a = item.children;
+                            if(a[1].value!=vm.msg[index].ans){
+                                a[2].style.visibility="visible";
+                                vm.wrongNum = vm.wrongNum +1;
+                            }
+                        });
+                        this.ischeck = true;
+                    }
+                }
+            });
+        }
+    </script>
+<style>
+    .align-center{
+       padding-top: 10%;
+    }
+    .mytop{
+        margin-top: 30px;
+    }
+    .myjumbotron{
+        background-color: #add7ea
+    }
+    .myjumbotron1{
+        background-color: #ea7e58
+    }
+</style>
+</head>
+<body>
+    <div id="box">
+        <div class="container align-center">
+            <div class=" myjumbotron  jumbotron" v-bind:class="{ 'myjumbotron1' :skinchange}">
+                <div class="page-header">
+                    <h1>四则运算练习系统</h1>
+                </div>
+                题目数量：<select id="itemNum" v-model="selected" @onchange="get()">
+                <option value="" selected>请选择题目数量</option>
+                <option value="1">1题</option>
+                <option value="2">2题</option>
+                <option value="3">3题</option>
+                <option value="4">4题</option>
+                <option value="5">5题</option>
+                 </select>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="row">
+                            <div v-for="(item,index) in msg">
+                                <div class="col-md-4">
+                                    <div class="input-group mytop" v-bind:data-index="index" >
+                                        <span class="input-group-addon" >{{ item.question }} =</span>
+                                        <input type="text" class="form-control" aria-describedby="basic-addon3">
+                                        <span class="input-group-addon"  style="background-color: #f66;visibility:hidden;font-size: 1.2em">正确答案：{{item.ans}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div v-if="ischeck" style="margin-top: 20px" class="alert alert-danger" role="alert">正确题数：{{selected-wrongNum}}<br>错误题数：{{wrongNum}}<br>分数：{{(selected-wrongNum)/selected*100}}</div>
+                <button type="button" @click="check()" v-bind:class="{ 'btn-success':skinchange}" v-bind:disabled="ischeck"   class="btn btn-primary mytop">提交</button>
+                <button type="button" @click="get()" v-bind:class="{ 'btn-success':skinchange}" class="btn btn-primary mytop">刷新</button>
+                <button type="button" @click="change()" v-bind:class="{ 'btn-success':skinchange}" class="btn btn-primary mytop">换肤</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,6 @@
+1.添加Mysql数据库，数据库名为test
+2.执行questionbank.sql文件
+3.使用Tomcat运行arthematic_Web exploded.war
+
+(注：
+	默认数据库连接名为root,密码为root,如需修改，请在Tomcat找到此项目更改datasource.properties中的内容		)
